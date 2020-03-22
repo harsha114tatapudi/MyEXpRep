@@ -1,0 +1,195 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <style type="text/css">
+        body {
+            font-family: Arial;
+            font-size: 10pt;
+        }
+
+        table {
+            border: 1px solid #ccc;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+            table th {
+                background-color: #B8DBFD;
+                color: #333;
+                font-weight: bold;
+            }
+
+            table th, table td {
+                padding: 5px;
+                border: 1px solid #ccc;
+            }
+
+            table, table table td {
+                border: 0px solid #ccc;
+            }
+
+        .Pager span {
+            text-align: center;
+            color: #333;
+            display: inline-block;
+            width: 20px;
+            background-color: #B8DBFD;
+            margin-right: 3px;
+            line-height: 150%;
+            border: 1px solid #B8DBFD;
+        }
+
+        .Pager a {
+            text-align: center;
+            display: inline-block;
+            width: 20px;
+            background-color: #ccc;
+            color: #333;
+            border: 1px solid #ccc;
+            margin-right: 3px;
+            line-height: 150%;
+            text-decoration: none;
+        }
+    </style>
+   
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            debugger
+            //Call EmpDetails jsonResult Method
+            $.getJSON("/Exp/AjaxMethod",
+                function (json) {
+                    var tr;
+                    //Append each row to html table
+                    for (var i = 0; i < json.length; i++) {
+                        tr = $('<tr/>');
+                        tr.append("<td><input type='checkbox' name='IsDelete' value='IsDelete'></td>");
+                        tr.append("<td>" + json[i].Id + "</td>");
+                        tr.append("<td>" + json[i].Name + "</td>");
+                        tr.append("<td>" + json[i].Country + "</td>");
+                        tr.append("<td>" + json[i].Gender + "</td>");
+                        tr.append("<td>" + json[i].IsMarried + "</td>");
+                        $('table').append(tr);
+                    }
+                });
+
+            $(".add-row").click(function () {
+                
+                AddRow();
+                
+             });
+
+             $(".delete-row").click(function () {
+                $("table tbody").find('input[name="IsDelete"]').each(function () {
+                    if ($(this).is(":checked")) {
+                        $(this).parents("tr").remove();
+                    }
+                });
+            });
+
+
+              function AddRow() {
+                
+                var td = "<td class=" + "select" + ">";
+                $.getJSON("/Exp/GetCountries",
+                    function (json) {
+                        
+                        var dd = "<select id=" + "countrySelect" + ">";
+                            
+                        $.each(json, function (index, value) {
+                            
+                                dd += "<option value='" + value + "'>" + value + "</option>";
+                                //$('<option>').val(value).text(value).appendTo("#countrySelect");
+                            });
+
+                        dd += "</select>";
+
+                        td += dd + "</td>";
+                        var markup = "<tr>" +
+                            "<td><input type='checkbox' name='IsDelete' value='IsDelete'></td>" +
+                            "<td><input type='text' name='Id'></td>" +
+                            "<td><input type='text' name='Name'></td>" +
+                             td +
+                            "<td>" +
+                            "<input type=" + "radio" + " id=" + "male" + "name=" + "gender" + "value=" + "male" + ">" +
+                            "<label for=" + "male" + ">Male</label>" +
+                            "<input type=" + "radio" + " id=" + "female" + "name=" + "gender" + "value=" + "female" + ">" +
+                            "<label for=" + "male" + ">Female</label>" +
+                            "</td > " +
+                            "<td><input type='checkbox' name='IsMarried' value='IsMarried'></td>" +
+                            "</tr>";
+                            $("table tbody").append(markup);
+                });
+                return td;
+            }
+
+            $(".Save").click(function () {
+                debugger
+                //Loop through the Table rows and build a JSON array.
+                var customers = new Array();
+                $("#tblCustomers TBODY TR").each(function (a,b) {
+                    debugger
+                    var row = $(this);
+                    var customer = {};
+                   
+                    customer.Id = row.find("TD").eq(1).html();
+                    customer.Name = row.find("TD").eq(2).html();
+                    customer.Country = row.find("TD").eq(3).html();
+                    customer.Gender = row.find("TD").eq(4).html();
+                    customer.IsMarried = row.find("TD").eq(5).html();
+                    customers.push(customer);
+                });
+
+                //Send the JSON array to Controller using AJAX.
+                $.ajax({
+                    type: "POST",
+                    url: "/Exp/InsertCustomers",
+                    data: JSON.stringify(customers),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        alert(r + " record(s) inserted.");
+                    }
+                });
+            });
+
+            function AddRowToArray() {
+                var customers = new Array();
+
+            }
+
+           
+            
+           
+        });
+        
+    </script>
+</head>
+<body>
+    <input type="button" class="add-row" value="Add Row">
+    <input type="button" class="delete-row" value="Delete Row">
+    <input type="button" class="Save" value="Save All">
+
+    <table class="table table-bordered table-condensed table-hover table-striped" id="tblCustomers">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Country</th>
+                <th>Gender</th>
+                <th>IsMarried</th>
+
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</body>
+</html>

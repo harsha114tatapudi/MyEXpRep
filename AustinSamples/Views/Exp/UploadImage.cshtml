@@ -1,0 +1,60 @@
+﻿@model AustinSamples.Models.FileUploadMD
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+
+    <style type="text/css">
+        body {
+            font-family: Arial;
+            font-size: 10pt;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+
+
+   <div>
+        @using (Html.BeginForm("UploadImage", "Exp", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <span>Select File:</span>
+            @Html.TextBoxFor(m => m.PostedFile, new { type = "file", @onchange = "ValidateSingleInput(this);" })
+            <br />
+            @Html.ValidationMessageFor(m => m.PostedFile, "", new { @class = "error" })
+            <hr />
+            <input type="submit" value="Upload" />
+            <br />
+            <span style="color:green">@Html.Raw(ViewBag.Message)</span>
+        }
+    </div>
+<script>
+ var _validFileExtensions = [".jpg", ".jpeg", ".bmp", ".gif", ".png",".pdf"];    
+function ValidateSingleInput(oInput) {
+    if (oInput.type == "file") {
+        var sFileName = oInput.value;
+         if (sFileName.length > 0) {
+            var blnValid = false;
+            for (var j = 0; j < _validFileExtensions.length; j++) {
+                var sCurExtension = _validFileExtensions[j];
+                if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                    blnValid = true;
+                    break;
+                }
+            }
+             
+            if (!blnValid) {
+                alert("Sorry, " + sFileName + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+                oInput.value = "";
+                return false;
+            }
+        }
+    }
+    return true;
+}
+</script>
+
